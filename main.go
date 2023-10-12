@@ -45,8 +45,8 @@ var (
 			Value:    &plugin.CPUWarn,
 		},
 		&sensu.PluginConfigOption[float64]{
-			Path:     "cpucrit",
-			Argument: "cpucrit",
+			Path:     "cpu-crit",
+			Argument: "cpu-crit",
 			Default:  float64(75),
 			Usage:    "Critical if process is using more than cpu-crit (in percent)",
 			Value:    &plugin.CPUCrit,
