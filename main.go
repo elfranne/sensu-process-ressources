@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"math"
-	"regexp"
-	"time"
 
 	corev2 "github.com/sensu/core/v2"
 	"github.com/sensu/sensu-plugin-sdk/sensu"
@@ -14,53 +12,58 @@ import (
 // Config represents the check plugin config.
 type Config struct {
 	sensu.PluginConfig
-	CPU    float64
-	Memory float32
-	Scheme string
-	Expand string
+	CPUWarn    float64
+	CPUCrit    float64
+	MemoryWarn float32
+	MemoryCrit float32
+	Scheme     string
+	Process    string
 }
 
 var (
 	plugin = Config{
 		PluginConfig: sensu.PluginConfig{
-			Name:     "check-cpu-usage",
-			Short:    "Check CPU usage and provide metrics",
-			Keyspace: "sensu.io/plugins/check-cpu-usage/config",
+			Name:     "check-process-ressources",
+			Short:    "Check if process is using too much ressources (CPU/memory)",
+			Keyspace: "sensu.io/plugins/check-process-ressources/config",
 		},
 	}
 
 	options = []sensu.ConfigOption{
+		&sensu.PluginConfigOption[string]{
+			Path:     "process",
+			Argument: "process",
+			Default:  "",
+			Usage:    "Process to monitor",
+			Value:    &plugin.Process,
+		},
 		&sensu.PluginConfigOption[float64]{
-			Path:      "cpu",
-			Argument:  "cpu",
-			Shorthand: "c",
-			Default:   float64(10),
-			Usage:     "Show metrics for processes above CPU x%",
-			Value:     &plugin.CPU,
+			Path:     "cpu-warn",
+			Argument: "cpu-warn",
+			Default:  float64(50),
+			Usage:    "Warn if process is using more than cpu-warn (in percent)",
+			Value:    &plugin.CPUWarn,
+		},
+		&sensu.PluginConfigOption[float64]{
+			Path:     "cpucrit",
+			Argument: "cpucrit",
+			Default:  float64(75),
+			Usage:    "Critical if process is using more than cpu-crit (in percent)",
+			Value:    &plugin.CPUCrit,
 		},
 		&sensu.PluginConfigOption[float32]{
-			Path:      "memory",
-			Argument:  "memory",
-			Shorthand: "m",
-			Default:   float32(10),
-			Usage:     "Show metrics for processes above Memory x%",
-			Value:     &plugin.Memory,
+			Path:     "memory-warn",
+			Argument: "memory-warn",
+			Default:  float32(50),
+			Usage:    "Warn if process is using more than memory-warn (in percent)",
+			Value:    &plugin.MemoryWarn,
 		},
-		&sensu.PluginConfigOption[string]{
-			Path:      "scheme",
-			Argument:  "scheme",
-			Shorthand: "s",
-			Default:   "",
-			Usage:     "Scheme to prepend metric",
-			Value:     &plugin.Scheme,
-		},
-		&sensu.PluginConfigOption[string]{
-			Path:      "expand",
-			Argument:  "expand",
-			Shorthand: "e",
-			Default:   "",
-			Usage:     "Expand name for process to include argurment(s) (usefull for bash or powershell)",
-			Value:     &plugin.Expand,
+		&sensu.PluginConfigOption[float32]{
+			Path:     "memory-crit",
+			Argument: "memory-crit",
+			Default:  float32(70),
+			Usage:    "Critical if process is using more than memory-crit (in percent)",
+			Value:    &plugin.MemoryCrit,
 		},
 	}
 )
@@ -71,14 +74,20 @@ func main() {
 }
 
 func checkArgs(event *corev2.Event) (int, error) {
-	if plugin.CPU == 100 {
+	if plugin.CPUCrit == 100 {
 		return sensu.CheckStateWarning, fmt.Errorf("that's just stupid")
 	}
-	if plugin.Memory == 100 {
+	if plugin.CPUWarn == 100 {
 		return sensu.CheckStateWarning, fmt.Errorf("that's just stupid")
 	}
-	if plugin.Scheme == "" {
-		return sensu.CheckStateWarning, fmt.Errorf("scheme is required")
+	if plugin.MemoryCrit == 100 {
+		return sensu.CheckStateWarning, fmt.Errorf("that's just stupid")
+	}
+	if plugin.MemoryWarn == 100 {
+		return sensu.CheckStateWarning, fmt.Errorf("that's just stupid")
+	}
+	if plugin.Process == "" {
+		return sensu.CheckStateWarning, fmt.Errorf("process is required")
 	}
 
 	return sensu.CheckStateOK, nil
@@ -88,27 +97,32 @@ func Round(x, unit float64) float64 {
 	return math.Round(x/unit) * unit
 }
 
-func ExpandName(name string, p *process.Process) string {
-	if plugin.Expand == name {
-		cmd, _ := p.Cmdline()
-		return cmd
-	} else {
-		return name
-	}
-}
-
 func executeCheck(event *corev2.Event) (int, error) {
-	re := regexp.MustCompile(`-+|\s+|/+|:+|\.+|,+|=+`)
 	process, _ := process.Processes()
 	for _, p := range process {
 		cpu, _ := p.CPUPercent()
 		memory, _ := p.MemoryPercent()
 		name, _ := p.Name()
-		expanded := ExpandName(name, p)
 
-		if cpu >= plugin.CPU || memory >= plugin.Memory {
-			fmt.Printf("%s.process.cpu_percent.%s %f %d\n", plugin.Scheme, re.ReplaceAllString(expanded, "_"), Round(cpu, 0.1), time.Now().Unix())
-			fmt.Printf("%s.process.memory_percent.%s %f %d\n", plugin.Scheme, re.ReplaceAllString(expanded, "_"), Round(float64(memory), 0.1), time.Now().Unix())
+		// Warning memory
+		if name == plugin.Process && memory >= plugin.MemoryWarn {
+			fmt.Printf("%s is using  %f %% memory, limit set at %f\n", plugin.Process, Round(float64(memory), 0.1), plugin.MemoryWarn)
+			return sensu.CheckStateWarning, nil
+		}
+		// Warning CPU
+		if name == plugin.Process && cpu >= plugin.CPUWarn {
+			fmt.Printf("%s is using  %f %% CPU, limit set at %f\n", plugin.Process, Round(float64(cpu), 0.1), plugin.CPUWarn)
+			return sensu.CheckStateWarning, nil
+		}
+		// Critical memory
+		if name == plugin.Process && memory >= plugin.MemoryCrit {
+			fmt.Printf("%s is using  %f %% memory, limit set at %f\n", plugin.Process, Round(float64(memory), 0.1), plugin.MemoryCrit)
+			return sensu.CheckStateCritical, nil
+		}
+		// Critical CPU
+		if name == plugin.Process && cpu >= plugin.CPUCrit {
+			fmt.Printf("%s is using  %f %% CPU, limit set at %f\n", plugin.Process, Round(float64(cpu), 0.1), plugin.CPUCrit)
+			return sensu.CheckStateCritical, nil
 		}
 	}
 	return sensu.CheckStateOK, nil
