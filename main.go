@@ -21,6 +21,7 @@ type Config struct {
 	TimeCrit   int64
 	Scheme     string
 	Process    string
+	CmdLine    bool
 }
 
 var (
@@ -39,6 +40,13 @@ var (
 			Default:  "",
 			Usage:    "Process to monitor",
 			Value:    &plugin.Process,
+		},
+		&sensu.PluginConfigOption[bool]{
+			Path:     "cmdline",
+			Argument: "cmdline",
+			Default:  false,
+			Usage:    "Use full command line of the process",
+			Value:    &plugin.CmdLine,
 		},
 		&sensu.PluginConfigOption[float64]{
 			Path:     "cpu-warn",
@@ -119,7 +127,12 @@ func executeCheck(event *corev2.Event) (int, error) {
 		memory, _ := p.MemoryPercent()
 		timems, _ := p.CreateTime() //create time is provide in millisecond epoch
 		time := float64(time.Now().Unix()) - math.Round(float64(timems)/1000)
-		name, _ := p.Name()
+		name := ""
+		if plugin.CmdLine {
+			name, _ = p.Cmdline()
+		} else {
+			name, _ = p.Name()
+		}
 
 		// Warning memory
 		if name == plugin.Process && memory >= plugin.MemoryWarn {
