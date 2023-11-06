@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"time"
 
 	corev2 "github.com/sensu/core/v2"
 	"github.com/sensu/sensu-plugin-sdk/sensu"
@@ -16,6 +17,8 @@ type Config struct {
 	CPUCrit    float64
 	MemoryWarn float32
 	MemoryCrit float32
+	TimeWarn   int64
+	TimeCrit   int64
 	Scheme     string
 	Process    string
 }
@@ -65,6 +68,18 @@ var (
 			Usage:    "Critical if process is using more than memory-crit (in percent)",
 			Value:    &plugin.MemoryCrit,
 		},
+		&sensu.PluginConfigOption[int64]{
+			Path:     "time-warn",
+			Argument: "time-warn",
+			Usage:    "Warn if process is using more than memory-warn (in percent)",
+			Value:    &plugin.TimeWarn,
+		},
+		&sensu.PluginConfigOption[int64]{
+			Path:     "time-crit",
+			Argument: "time-crit",
+			Usage:    "Critical if process is using more than memory-crit (in percent)",
+			Value:    &plugin.TimeCrit,
+		},
 	}
 )
 
@@ -102,6 +117,8 @@ func executeCheck(event *corev2.Event) (int, error) {
 	for _, p := range process {
 		cpu, _ := p.CPUPercent()
 		memory, _ := p.MemoryPercent()
+		timems, _ := p.CreateTime() //create time is provide in millisecond epoch
+		time := float64(time.Now().Unix()) - math.Round(float64(timems)/1000)
 		name, _ := p.Name()
 
 		// Warning memory
@@ -123,6 +140,16 @@ func executeCheck(event *corev2.Event) (int, error) {
 		if name == plugin.Process && cpu >= plugin.CPUCrit {
 			fmt.Printf("%s is using  %f %% CPU, limit set at %f\n", plugin.Process, Round(float64(cpu), 0.1), plugin.CPUCrit)
 			return sensu.CheckStateCritical, nil
+		}
+		// Warnning Time
+		if name == plugin.Process && plugin.TimeWarn > 0 && time >= float64(plugin.TimeWarn) {
+			fmt.Printf("%s has been running for  %f seconds, limit set at %d\n", plugin.Process, time, plugin.TimeWarn)
+			return sensu.CheckStateWarning, nil
+		}
+		// Critical Time
+		if name == plugin.Process && plugin.TimeCrit > 0 && time >= float64(plugin.TimeCrit) {
+			fmt.Printf("%s has been running for  %f seconds, limit set at %d\n", plugin.Process, time, plugin.TimeCrit)
+			return sensu.CheckStateWarning, nil
 		}
 	}
 	return sensu.CheckStateOK, nil
