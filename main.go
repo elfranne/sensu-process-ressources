@@ -162,7 +162,7 @@ func executeCheck(event *corev2.Event) (int, error) {
 		// Critical Time
 		if name == plugin.Process && plugin.TimeCrit > 0 && time >= float64(plugin.TimeCrit) {
 			fmt.Printf("%s has been running for  %f seconds, limit set at %d\n", plugin.Process, time, plugin.TimeCrit)
-			return sensu.CheckStateWarning, nil
+			return sensu.CheckStateCritical, nil
 		}
 	}
 	return sensu.CheckStateOK, nil
