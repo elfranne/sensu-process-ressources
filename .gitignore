@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-sensu-process-ressources
+sensu-prometheus-metrics-checks
 
 # Test binary, build with `go test -c`
 *.test

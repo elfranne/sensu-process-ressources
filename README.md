@@ -1,6 +1,6 @@
-[![Sensu Bonsai Asset](https://img.shields.io/badge/Bonsai-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/elfranne/sensu-process-ressources)
-![Go Test](https://github.com/elfranne/sensu-process-ressources/workflows/Go%20Test/badge.svg)
-![goreleaser](https://github.com/elfranne/sensu-process-ressources/workflows/goreleaser/badge.svg)
+[![Sensu Bonsai Asset](https://img.shields.io/badge/Bonsai-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/elfranne/sensu-prometheus-metrics-checks)
+![Go Test](https://github.com/elfranne/sensu-prometheus-metrics-checks/workflows/Go%20Test/badge.svg)
+![goreleaser](https://github.com/elfranne/sensu-prometheus-metrics-checks/workflows/goreleaser/badge.svg)
 
 # Check Plugin Template
 
@@ -18,7 +18,7 @@ and customize the `checkArgs` and `executeCheck` functions in [main.go][7].
 
 When writing or updating a plugin's README from this template, review the Sensu Community
 [plugin README style guide][3] for content suggestions and guidance. Remove everything
-prior to `# sensu-process-ressources` from the generated README file, and add additional context about the
+prior to `# sensu-prometheus-metrics-checks` from the generated README file, and add additional context about the
 plugin per the style guide.
 
 ## Releases with Github Actions
@@ -29,7 +29,7 @@ the plugin with goreleaser. Register the asset with [Bonsai][8] to share it with
 
 ***
 
-# sensu-process-ressources
+# sensu-prometheus-metrics-checks
 
 ## Table of Contents
 - [Overview](#overview)
@@ -44,7 +44,7 @@ the plugin with goreleaser. Register the asset with [Bonsai][8] to share it with
 
 ## Overview
 
-The sensu-process-ressources is a [Sensu Check][6] that ...
+The sensu-prometheus-metrics-checks is a [Sensu Check][6] that ...
 
 ## Files
 
@@ -59,10 +59,10 @@ consider doing so! If you're using sensuctl 5.13 with Sensu Backend 5.13 or late
 following command to add the asset:
 
 ```
-sensuctl asset add elfranne/sensu-process-ressources
+sensuctl asset add elfranne/sensu-prometheus-metrics-checks
 ```
 
-If you're using an earlier version of sensuctl, you can find the asset on the [Bonsai Asset Index][https://bonsai.sensu.io/assets/elfranne/sensu-process-ressources].
+If you're using an earlier version of sensuctl, you can find the asset on the [Bonsai Asset Index][https://bonsai.sensu.io/assets/elfranne/sensu-prometheus-metrics-checks].
 
 ### Check definition
 
@@ -71,14 +71,14 @@ If you're using an earlier version of sensuctl, you can find the asset on the [B
 type: CheckConfig
 api_version: core/v2
 metadata:
-  name: sensu-process-ressources
+  name: sensu-prometheus-metrics-checks
   namespace: default
 spec:
-  command: sensu-process-ressources --example example_arg
+  command: sensu-prometheus-metrics-checks --example example_arg
   subscriptions:
   - system
   runtime_assets:
-  - elfranne/sensu-process-ressources
+  - elfranne/sensu-prometheus-metrics-checks
 ```
 
 ## Installation from source
@@ -87,7 +87,7 @@ The preferred way of installing and deploying this plugin is to use it as an Ass
 like to compile and install the plugin from source or contribute to it, download the latest version
 or create an executable script from this source.
 
-From the local path of the sensu-process-ressources repository:
+From the local path of the sensu-prometheus-metrics-checks repository:
 
 ```
 go build
@@ -102,8 +102,8 @@ For more information about contributing to this plugin, see [Contributing][1].
 [1]: https://github.com/sensu/sensu-go/blob/master/CONTRIBUTING.md
 [2]: https://github.com/sensu/sensu-plugin-sdk
 [3]: https://github.com/sensu-plugins/community/blob/master/PLUGIN_STYLEGUIDE.md
-[4]: https://github.com/elfranne/sensu-process-ressources/blob/master/.github/workflows/release.yml
-[5]: https://github.com/elfranne/sensu-process-ressources/actions
+[4]: https://github.com/elfranne/sensu-prometheus-metrics-checks/blob/master/.github/workflows/release.yml
+[5]: https://github.com/elfranne/sensu-prometheus-metrics-checks/actions
 [6]: https://docs.sensu.io/sensu-go/latest/reference/checks/
 [7]: https://github.com/sensu/check-plugin-template/blob/master/main.go
 [8]: https://bonsai.sensu.io/
