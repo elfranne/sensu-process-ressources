@@ -134,35 +134,35 @@ func executeCheck(event *corev2.Event) (int, error) {
 			name, _ = p.Name()
 		}
 
-		// Warning memory
-		if name == plugin.Process && memory >= plugin.MemoryWarn {
-			fmt.Printf("%s is using %f %% memory, limit set at %f\n", plugin.Process, Round(float64(memory), 0.1), plugin.MemoryWarn)
-			return sensu.CheckStateWarning, nil
-		}
-		// Warning CPU
-		if name == plugin.Process && cpu >= plugin.CPUWarn {
-			fmt.Printf("%s is using %f %% CPU, limit set at %f\n", plugin.Process, Round(float64(cpu), 0.1), plugin.CPUWarn)
-			return sensu.CheckStateWarning, nil
-		}
 		// Critical memory
 		if name == plugin.Process && memory >= plugin.MemoryCrit {
 			fmt.Printf("%s is using %f %% memory, limit set at %f\n", plugin.Process, Round(float64(memory), 0.1), plugin.MemoryCrit)
 			return sensu.CheckStateCritical, nil
+		}
+		// Warning memory
+		if name == plugin.Process && memory >= plugin.MemoryWarn {
+			fmt.Printf("%s is using %f %% memory, limit set at %f\n", plugin.Process, Round(float64(memory), 0.1), plugin.MemoryWarn)
+			return sensu.CheckStateWarning, nil
 		}
 		// Critical CPU
 		if name == plugin.Process && cpu >= plugin.CPUCrit {
 			fmt.Printf("%s is using %f %% CPU, limit set at %f\n", plugin.Process, Round(float64(cpu), 0.1), plugin.CPUCrit)
 			return sensu.CheckStateCritical, nil
 		}
-		// Warnning Time
-		if name == plugin.Process && plugin.TimeWarn > 0 && time >= float64(plugin.TimeWarn) {
-			fmt.Printf("%s has been running for %f seconds, limit set at %d\n", plugin.Process, time, plugin.TimeWarn)
+		// Warning CPU
+		if name == plugin.Process && cpu >= plugin.CPUWarn {
+			fmt.Printf("%s is using %f %% CPU, limit set at %f\n", plugin.Process, Round(float64(cpu), 0.1), plugin.CPUWarn)
 			return sensu.CheckStateWarning, nil
 		}
 		// Critical Time
 		if name == plugin.Process && plugin.TimeCrit > 0 && time >= float64(plugin.TimeCrit) {
 			fmt.Printf("%s has been running for %f seconds, limit set at %d\n", plugin.Process, time, plugin.TimeCrit)
 			return sensu.CheckStateCritical, nil
+		}
+		// Warnning Time
+		if name == plugin.Process && plugin.TimeWarn > 0 && time >= float64(plugin.TimeWarn) {
+			fmt.Printf("%s has been running for %f seconds, limit set at %d\n", plugin.Process, time, plugin.TimeWarn)
+			return sensu.CheckStateWarning, nil
 		}
 	}
 	return sensu.CheckStateOK, nil
