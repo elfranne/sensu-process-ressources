@@ -7,6 +7,8 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.2.4] - 2026-09-09
+
 ### Fixed
 - Critical thresholds are now evaluated before warning thresholds. Each branch
   returns as soon as it matches, so with the expected `warn < crit` ordering the
@@ -87,6 +89,7 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 - Initial release: check the memory and CPU usage of a named process against
   warning and critical thresholds.
 
+[1.2.4]: https://github.com/elfranne/sensu-process-ressources/releases/tag/1.2.4
 [1.2.3]: https://github.com/elfranne/sensu-process-ressources/releases/tag/1.2.3
 [1.2.2]: https://github.com/elfranne/sensu-process-ressources/releases/tag/1.2.2
 [1.2.1]: https://github.com/elfranne/sensu-process-ressources/releases/tag/1.2.1
